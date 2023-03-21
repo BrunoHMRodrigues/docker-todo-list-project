@@ -1,0 +1,41 @@
+version: '3'
+services:
+  todoback:
+    image: todobackend
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    ports:
+      - 3001:3001
+    networks:
+      - todo-app-net
+  todofront:
+    image: todofrontend
+    restart: always
+    ports:
+      - 3000:3000
+    depends_on:
+      - todoback
+    environment:
+      REACT_APP_API_HOST: todoback 
+      REACT_APP_API_PORT: 3001
+    networks:
+      - todo-app-net
+  todotests:
+    image: todotests
+    restart: always
+    depends_on:
+      - todofront
+      - todoback
+    environment:
+      FRONT_HOST: todofront
+      FRONT_PORT: 3000
+      BACK_HOST: todoback
+      BACK_PORT: 3001
+    networks:
+      - todo-app-net
+networks:
+  todo-app-net:
